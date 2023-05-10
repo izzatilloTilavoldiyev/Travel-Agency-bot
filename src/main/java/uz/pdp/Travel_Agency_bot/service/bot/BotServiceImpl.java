@@ -71,10 +71,21 @@ public class BotServiceImpl implements BotService{
         return SendPhoto.builder()
                 .chatId(chatId)
                 .caption("FRANCE")
-                .replyMarkup(inlineButtons.franceButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_bot\\pictures\\france.jpg")))
+                .replyMarkup(inlineButtons.countryButtons())
+                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\france.jpg")))
                 .build();
     }
+
+    @Override
+    public SendPhoto germany(String chatId) {
+        return SendPhoto.builder()
+                .chatId(chatId)
+                .caption("GERMANY")
+                .replyMarkup(inlineButtons.countryButtons())
+                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\germany.jpg")))
+                .build();
+    }
+
     @Override
     public SendMessage replyKeyboardRemove() {
         SendMessage sendMessage = new SendMessage();

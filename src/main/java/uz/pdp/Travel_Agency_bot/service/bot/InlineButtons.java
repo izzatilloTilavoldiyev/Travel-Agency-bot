@@ -156,7 +156,7 @@ public class InlineButtons {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup franceButtons() {
+    public InlineKeyboardMarkup countryButtons() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();

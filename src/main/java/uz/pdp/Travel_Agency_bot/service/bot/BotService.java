@@ -12,5 +12,6 @@ public interface BotService {
     SendPhoto africaMenu(String chatId);
     SendPhoto americaMenu(String chatId);
     SendPhoto france(String chatId);
+    SendPhoto germany(String chatId);
     SendMessage replyKeyboardRemove();
 }

@@ -3,6 +3,7 @@ package uz.pdp.Travel_Agency_bot.bot;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -87,6 +88,24 @@ public class Travel_bot extends TelegramLongPollingBot {
                 case AMERICA -> {
                     execute(botService.americaMenu(chatId.toString()));
                     userService.updateState(chatId, UserState.MENU);
+                }
+            }
+        } else if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            Message message = callbackQuery.getMessage();
+            String data = callbackQuery.getData();
+            Long chatId = message.getChatId();
+
+            Optional<User> currentUser = userService.getUserByChatId(chatId);
+            if (currentUser.isPresent()) {
+                UserState userState = currentUser.get().getState();
+                switch (userState) {
+                    case MENU -> {
+                        switch (data) {
+                            case "FRANCE" -> execute(botService.france(chatId.toString()));
+                            case "GERMANY" -> execute(botService.germany(chatId.toString()));
+                        }
+                    }
                 }
             }
         }
