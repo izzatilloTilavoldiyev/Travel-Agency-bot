@@ -4,4 +4,10 @@
   "lastName" : null,
   "phoneNumber" : "+998950872052",
   "state" : "MENU"
+}, {
+  "chatId" : 5180427425,
+  "firstName" : "Jamshidbek Karimov",
+  "lastName" : null,
+  "phoneNumber" : "+998940748463",
+  "state" : "MENU"
 } ]

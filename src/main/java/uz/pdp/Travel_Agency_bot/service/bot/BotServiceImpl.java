@@ -67,23 +67,28 @@ public class BotServiceImpl implements BotService{
     }
 
     @Override
-    public SendPhoto france(String chatId) {
+    public SendPhoto country(String chatId, String country) {
+        String path = "";
+        switch (country) {
+            case "FRANCE" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\france.jpg";
+            case "GERMANY" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\germany.jpg";
+            case "SPAIN" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\spain.jpg";
+            case "TURKEY" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\turkey.jpg";
+            case "ITALY" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\italy.jpg";
+        }
         return SendPhoto.builder()
                 .chatId(chatId)
-                .caption("FRANCE")
+                .caption(country)
                 .replyMarkup(inlineButtons.countryButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\france.jpg")))
+                .photo(new InputFile(new File(path)))
                 .build();
     }
 
     @Override
-    public SendPhoto germany(String chatId) {
-        return SendPhoto.builder()
-                .chatId(chatId)
-                .caption("GERMANY")
-                .replyMarkup(inlineButtons.countryButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\germany.jpg")))
-                .build();
+    public SendMessage transportMenu(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, "Choose transport");
+        sendMessage.setReplyMarkup(replyButtons.transportMenu());
+        return sendMessage;
     }
 
     @Override

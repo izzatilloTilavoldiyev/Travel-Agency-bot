@@ -8,5 +8,6 @@ public enum UserState {
     AFRICA,
     AMERICA,
     MENU,
-    INTEREST
+    INTEREST,
+    TRANSPORT
 }

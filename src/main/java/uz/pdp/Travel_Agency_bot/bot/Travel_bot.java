@@ -20,8 +20,8 @@ public class Travel_bot extends TelegramLongPollingBot {
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-
         if (update.hasMessage()) {
+
             Message message = update.getMessage();
             String text = message.getText();
             Long chatId = message.getChatId();
@@ -101,9 +101,21 @@ public class Travel_bot extends TelegramLongPollingBot {
                 UserState userState = currentUser.get().getState();
                 switch (userState) {
                     case MENU -> {
+                        execute(botService.country(chatId.toString(), data));
+                        userService.updateState(chatId, UserState.INTEREST);
+                    }
+                    case INTEREST -> {
+                        System.out.println(userState);
+                        System.out.println(data);
                         switch (data) {
-                            case "FRANCE" -> execute(botService.france(chatId.toString()));
-                            case "GERMANY" -> execute(botService.germany(chatId.toString()));
+                            case "Buy ticket" -> {
+                                execute(botService.transportMenu(chatId.toString()));
+                                userService.updateState(chatId, UserState.MENU);
+                            }
+                            case "MENU" -> {
+                                userService.updateState(chatId, UserState.MENU);
+                                execute(new SendMessage(chatId.toString(), "Back to menu"));
+                            }
                         }
                     }
                 }
