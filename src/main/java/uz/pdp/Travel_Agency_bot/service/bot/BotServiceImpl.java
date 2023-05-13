@@ -46,19 +46,11 @@ public class BotServiceImpl implements BotService {
         BaseUtils.countries.remove(chatId);
         BaseUtils.countries.put(chatId, country);
 
-        String path = "";
-        switch (country) {
-            case "FRANCE" -> path = BASE_URL + "france.jpg";
-            case "GERMANY" -> path = BASE_URL + "germany.jpg";
-            case "SPAIN" -> path = BASE_URL + "spain.jpg";
-            case "TURKEY" -> path = BASE_URL + "turkey.jpg";
-            case "ITALY" -> path = BASE_URL + "italy.jpg";
-        }
         return SendPhoto.builder()
                 .chatId(chatId)
                 .caption(country)
                 .replyMarkup(inlineButtons.countryButtons())
-                .photo(new InputFile(new File(path)))
+                .photo(new InputFile(new File(BASE_URL + country.toLowerCase() + ".jpg")))
                 .build();
     }
 
