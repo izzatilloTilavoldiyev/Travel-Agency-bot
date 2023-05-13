@@ -65,13 +65,17 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
-    public SendMessage countryInfo() {
-        return null;
+    public SendMessage countryInfo(String chatId, String country) {
+        SendMessage sendMessage = new SendMessage();
+        String info = countryService.countryInfoDB(country);
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(info);
+        return sendMessage;
     }
 
     @Override
-    public SendMessage replyKeyboardRemove() {
-        SendMessage sendMessage = new SendMessage();
+    public SendMessage replyKeyboardRemove(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, "choose");
         sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
         return sendMessage;
     }

@@ -15,7 +15,7 @@ public interface BotService {
 
     SendPhoto transportMenu(String chatId);
 
-    SendMessage countryInfo();
+    SendMessage countryInfo(String chatId, String country);
 
-    SendMessage replyKeyboardRemove();
+    SendMessage replyKeyboardRemove(String chatId);
 }

@@ -104,6 +104,7 @@ public class Travel_bot extends TelegramLongPollingBot {
                     userService.updateState(chatId, UserState.MENU);
                 }
             }
+
         } else if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             Message message = callbackQuery.getMessage();
@@ -115,19 +116,28 @@ public class Travel_bot extends TelegramLongPollingBot {
                 UserState userState = currentUser.get().getState();
                 switch (userState) {
                     case MENU -> {
+                        execute(botService.replyKeyboardRemove(chatId));
                         execute(botService.countryServiceButtons(chatId, data));
                         userService.updateState(chatId, UserState.COUNTRY);
+                        userState = UserState.COUNTRY;
                     }
                     case COUNTRY -> {
                         switch (data) {
                             case "Buy ticket" -> execute(botService.transportMenu(chatId));
                             case "More info" -> {
-
+                                Map<String, String> countries = BaseUtils.countries;
+                                execute(new SendMessage(chatId, "You can click to this link to get more info"));
+                                execute(botService.countryInfo(chatId, countries.get(chatId)));
+                                userService.updateState(chatId, UserState.MENU);
+                                userState = UserState.MENU;
                             }
                             case "MENU" -> {
                                 userService.updateState(chatId, UserState.MENU);
-                                execute(new SendMessage(chatId, "Back to menu"));
+                                userState = UserState.MENU;
                             }
+                        }
+                        if (userState.equals(UserState.MENU)) {
+                            execute(botService.menu(chatId));
                         }
                     }
                 }

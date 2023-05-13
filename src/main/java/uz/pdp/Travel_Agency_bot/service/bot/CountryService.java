@@ -56,4 +56,20 @@ public class CountryService {
         }
     }
 
+    public String countryInfoDB(String country) {
+        String res = "";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            String query = "select * from country_info where country_name = '"+ country + "'";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                res = resultSet.getString(3);
+            }
+            return res;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
