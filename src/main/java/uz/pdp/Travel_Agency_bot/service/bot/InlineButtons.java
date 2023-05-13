@@ -28,7 +28,24 @@ public class InlineButtons {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup countryButtons() {
+    public InlineKeyboardMarkup transportButtons(ArrayList<String> countriesDB) {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        for (String s : countriesDB) {
+            InlineKeyboardButton button = new InlineKeyboardButton(s);
+            button.setCallbackData(s);
+            row.add(button);
+            rows.add(row);
+            row = new ArrayList<>();
+        }
+
+        inlineKeyboardMarkup.setKeyboard(rows);
+        return inlineKeyboardMarkup;
+    }
+    public InlineKeyboardMarkup countryServiceButtons() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();

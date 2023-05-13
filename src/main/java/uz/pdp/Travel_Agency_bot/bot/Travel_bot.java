@@ -54,12 +54,11 @@ public class Travel_bot extends TelegramLongPollingBot {
                             }
                         }
                     }
-                    case INTEREST -> {
+                    case COUNTRY -> {
                         switch (text) {
                             case "Bus" -> {
                                 Map<String, String> countries = BaseUtils.countries;
                                 String country = countries.get(chatId);
-                                System.out.println("countries = " + countries);
                                 System.out.println("country = " + country);
                             }
                             case "Train" -> {
@@ -116,15 +115,15 @@ public class Travel_bot extends TelegramLongPollingBot {
                 UserState userState = currentUser.get().getState();
                 switch (userState) {
                     case MENU -> {
-                        execute(botService.country(chatId, data));
-                        userService.updateState(chatId, UserState.INTEREST);
+                        execute(botService.countryServiceButtons(chatId, data));
+                        userService.updateState(chatId, UserState.COUNTRY);
                     }
-                    case INTEREST -> {
-                        System.out.println(userState);
-                        System.out.println(data);
+                    case COUNTRY -> {
                         switch (data) {
                             case "Buy ticket" -> execute(botService.transportMenu(chatId));
+                            case "More info" -> {
 
+                            }
                             case "MENU" -> {
                                 userService.updateState(chatId, UserState.MENU);
                                 execute(new SendMessage(chatId, "Back to menu"));

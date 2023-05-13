@@ -41,21 +41,4 @@ public class ReplyButtons {
         return replyKeyboardMarkup;
     }
 
-    public ReplyKeyboardMarkup transportMenu() {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        List<KeyboardRow> rows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-        row.add("Bus");
-        row.add("Train");
-        rows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Plane");
-        rows.add(row);
-
-        replyKeyboardMarkup.setKeyboard(rows);
-        return replyKeyboardMarkup;
-    }
 }

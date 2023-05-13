@@ -40,4 +40,20 @@ public class CountryService {
         }
     }
 
+    public ArrayList<String> transportsDB() {
+        ArrayList<String> transportsDB = new ArrayList<>();
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            String query = "select * from transports";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                transportsDB.add(resultSet.getString(2));
+            }
+            return transportsDB;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

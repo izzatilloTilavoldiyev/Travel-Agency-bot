@@ -41,7 +41,7 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
-    public SendPhoto country(String chatId, String country) {
+    public SendPhoto countryServiceButtons(String chatId, String country) {
 
         BaseUtils.countries.remove(chatId);
         BaseUtils.countries.put(chatId, country);
@@ -49,16 +49,24 @@ public class BotServiceImpl implements BotService {
         return SendPhoto.builder()
                 .chatId(chatId)
                 .caption(country)
-                .replyMarkup(inlineButtons.countryButtons())
+                .replyMarkup(inlineButtons.countryServiceButtons())
                 .photo(new InputFile(new File(BASE_URL + country.toLowerCase() + ".jpg")))
                 .build();
     }
 
     @Override
-    public SendMessage transportMenu(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, "Choose transport");
-        sendMessage.setReplyMarkup(replyButtons.transportMenu());
-        return sendMessage;
+    public SendPhoto transportMenu(String chatId) {
+        return SendPhoto.builder()
+                .chatId(chatId)
+                .caption("Choose transport")
+                .replyMarkup(inlineButtons.transportButtons(countryService.transportsDB()))
+                .photo(new InputFile(new File(BASE_URL + "transports.jpg")))
+                .build();
+    }
+
+    @Override
+    public SendMessage countryInfo() {
+        return null;
     }
 
     @Override

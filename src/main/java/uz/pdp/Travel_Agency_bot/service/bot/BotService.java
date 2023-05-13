@@ -11,9 +11,11 @@ public interface BotService {
 
     SendPhoto countryMenu(String chatId, Long continent_id, UserState state);
 
-    SendPhoto country(String chatId, String country);
+    SendPhoto countryServiceButtons(String chatId, String country);
+
+    SendPhoto transportMenu(String chatId);
+
+    SendMessage countryInfo();
 
     SendMessage replyKeyboardRemove();
-
-    SendMessage transportMenu(String chatId);
 }
