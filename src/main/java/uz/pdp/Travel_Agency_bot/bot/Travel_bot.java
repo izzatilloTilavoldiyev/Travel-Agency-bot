@@ -9,7 +9,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import uz.pdp.Travel_Agency_bot.model.User;
 import uz.pdp.Travel_Agency_bot.model.UserState;
+import uz.pdp.Travel_Agency_bot.util.BaseUtils;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static uz.pdp.Travel_Agency_bot.util.BeanUtil.botService;
@@ -24,7 +26,7 @@ public class Travel_bot extends TelegramLongPollingBot {
 
             Message message = update.getMessage();
             String text = message.getText();
-            Long chatId = message.getChatId();
+            String chatId = message.getChatId().toString();
 
             Optional<User> currentUser = userService.getUserByChatId(chatId);
             UserState userState = UserState.START;
@@ -52,6 +54,19 @@ public class Travel_bot extends TelegramLongPollingBot {
                             }
                         }
                     }
+                    case INTEREST -> {
+                        switch (text) {
+                            case "Bus" -> {
+                                Map<String, String> countries = BaseUtils.countries;
+                                String country = countries.get(chatId);
+                                System.out.println("countries = " + countries);
+                                System.out.println("country = " + country);
+                            }
+                            case "Train" -> {
+
+                            }
+                        }
+                    }
                 }
 
             } else if (message.hasContact()) {
@@ -67,26 +82,26 @@ public class Travel_bot extends TelegramLongPollingBot {
                 userService.add(user);
                 userState = UserState.REGISTERED;
 
-                execute(new SendMessage(chatId.toString(), "Successfully registered!"));
+                execute(new SendMessage(chatId, "Successfully registered!"));
             }
 
             switch (userState) {
-                case START -> execute(botService.register(chatId.toString()));
-                case REGISTERED, MENU -> execute(botService.menu(chatId.toString()));
+                case START -> execute(botService.register(chatId));
+                case REGISTERED, MENU -> execute(botService.menu(chatId));
                 case EUROPE -> {
-                    execute(botService.europeMenu(chatId.toString()));
+                    execute(botService.countryMenu(chatId, 1L, userState));
                     userService.updateState(chatId, UserState.MENU);
                 }
                 case ASIA -> {
-                    execute(botService.asiaMenu(chatId.toString()));
+                    execute(botService.countryMenu(chatId, 2L, userState));
                     userService.updateState(chatId, UserState.MENU);
                 }
                 case AFRICA -> {
-                    execute(botService.africaMenu(chatId.toString()));
+                    execute(botService.countryMenu(chatId, 3L, userState));
                     userService.updateState(chatId, UserState.MENU);
                 }
                 case AMERICA -> {
-                    execute(botService.americaMenu(chatId.toString()));
+                    execute(botService.countryMenu(chatId, 4L, userState));
                     userService.updateState(chatId, UserState.MENU);
                 }
             }
@@ -94,27 +109,25 @@ public class Travel_bot extends TelegramLongPollingBot {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             Message message = callbackQuery.getMessage();
             String data = callbackQuery.getData();
-            Long chatId = message.getChatId();
+            String chatId = message.getChatId().toString();
 
             Optional<User> currentUser = userService.getUserByChatId(chatId);
             if (currentUser.isPresent()) {
                 UserState userState = currentUser.get().getState();
                 switch (userState) {
                     case MENU -> {
-                        execute(botService.country(chatId.toString(), data));
+                        execute(botService.country(chatId, data));
                         userService.updateState(chatId, UserState.INTEREST);
                     }
                     case INTEREST -> {
                         System.out.println(userState);
                         System.out.println(data);
                         switch (data) {
-                            case "Buy ticket" -> {
-                                execute(botService.transportMenu(chatId.toString()));
-                                userService.updateState(chatId, UserState.MENU);
-                            }
+                            case "Buy ticket" -> execute(botService.transportMenu(chatId));
+
                             case "MENU" -> {
                                 userService.updateState(chatId, UserState.MENU);
-                                execute(new SendMessage(chatId.toString(), "Back to menu"));
+                                execute(new SendMessage(chatId, "Back to menu"));
                             }
                         }
                     }

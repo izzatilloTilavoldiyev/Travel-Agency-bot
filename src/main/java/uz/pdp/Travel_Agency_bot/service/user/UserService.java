@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface UserService extends BaseService<User> {
 
-    Optional<User> getUserByChatId(Long chatId);
-    void updateState(Long chatId, UserState userState);
+    Optional<User> getUserByChatId(String chatId);
+
+    void updateState(String chatId, UserState userState);
 }

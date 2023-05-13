@@ -4,13 +4,17 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import uz.pdp.Travel_Agency_bot.model.UserState;
+import uz.pdp.Travel_Agency_bot.util.BaseUtils;
 
 import java.io.File;
 
-public class BotServiceImpl implements BotService{
+public class BotServiceImpl implements BotService {
 
+    public static final String BASE_URL = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\";
     ReplyButtons replyButtons = new ReplyButtons();
     InlineButtons inlineButtons = new InlineButtons();
+    CountryService countryService = new CountryService();
 
     @Override
     public SendMessage register(String chatId) {
@@ -22,59 +26,33 @@ public class BotServiceImpl implements BotService{
     @Override
     public SendMessage menu(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, "Menu");
-        sendMessage.setReplyMarkup(replyButtons.menuButtons());
+        sendMessage.setReplyMarkup(replyButtons.menuButtons(countryService.continentsDB()));
         return sendMessage;
     }
 
     @Override
-    public SendPhoto europeMenu(String chatId) {
+    public SendPhoto countryMenu(String chatId, Long continent_id, UserState userState) {
         return SendPhoto.builder()
                 .chatId(chatId)
-                .caption("Europe countries")
-                .replyMarkup(inlineButtons.europeButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\europe.jpg")))
-                .build();
-    }
-
-    @Override
-    public SendPhoto asiaMenu(String chatId) {
-        return SendPhoto.builder()
-                .chatId(chatId)
-                .caption("ASIA countries")
-                .replyMarkup(inlineButtons.asiaButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\asia.jpg")))
-                .build();
-    }
-
-    @Override
-    public SendPhoto africaMenu(String chatId) {
-        return SendPhoto.builder()
-                .chatId(chatId)
-                .caption("AFRICA countries")
-                .replyMarkup(inlineButtons.africaButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\africa.jpg")))
-                .build();
-    }
-
-    @Override
-    public SendPhoto americaMenu(String chatId) {
-        return SendPhoto.builder()
-                .chatId(chatId)
-                .caption("AMERICA countries")
-                .replyMarkup(inlineButtons.americaButtons())
-                .photo(new InputFile(new File("C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\america.jpg")))
+                .caption(userState.name() + " countries ")
+                .replyMarkup(inlineButtons.countryButtons(countryService.countyDB(continent_id)))
+                .photo(new InputFile(new File(BASE_URL + userState.name().toLowerCase() + ".jpg")))
                 .build();
     }
 
     @Override
     public SendPhoto country(String chatId, String country) {
+
+        BaseUtils.countries.remove(chatId);
+        BaseUtils.countries.put(chatId, country);
+
         String path = "";
         switch (country) {
-            case "FRANCE" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\france.jpg";
-            case "GERMANY" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\germany.jpg";
-            case "SPAIN" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\spain.jpg";
-            case "TURKEY" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\turkey.jpg";
-            case "ITALY" -> path = "C:\\Java_OOP_Projects\\Travel_Agency_bot\\pictures\\italy.jpg";
+            case "FRANCE" -> path = BASE_URL + "france.jpg";
+            case "GERMANY" -> path = BASE_URL + "germany.jpg";
+            case "SPAIN" -> path = BASE_URL + "spain.jpg";
+            case "TURKEY" -> path = BASE_URL + "turkey.jpg";
+            case "ITALY" -> path = BASE_URL + "italy.jpg";
         }
         return SendPhoto.builder()
                 .chatId(chatId)

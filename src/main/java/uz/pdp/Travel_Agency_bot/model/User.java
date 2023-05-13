@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class User {
-    private Long chatId;
+    private String chatId;
     private String firstName;
     private String lastName;
     private String phoneNumber;

@@ -4,5 +4,6 @@ import java.util.ArrayList;
 
 public interface BaseRepository<T> {
     ArrayList<T> readFromFile();
-    void writeToFile(ArrayList<T> ts);
+
+    void writeToFile(T t);
 }

@@ -23,21 +23,20 @@ public class ReplyButtons {
         return replyKeyboardMarkup;
     }
 
-    public ReplyKeyboardMarkup menuButtons() {
+    public ReplyKeyboardMarkup menuButtons(ArrayList<String> continentDB) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
         List<KeyboardRow> rows = new ArrayList<>();
 
         KeyboardRow row = new KeyboardRow();
-        row.add("EUROPE");
-        row.add("ASIA");
+        for (String s : continentDB) {
+            row.add(s);
+            if (row.size() == 2) {
+                rows.add(row);
+                row = new KeyboardRow();
+            }
+        }
         rows.add(row);
-
-        row = new KeyboardRow();
-        row.add("AFRICA");
-        row.add("AMERICA");
-        rows.add(row);
-
         replyKeyboardMarkup.setKeyboard(rows);
         return replyKeyboardMarkup;
     }

@@ -1,20 +1,18 @@
 package uz.pdp.Travel_Agency_bot.repository.user;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import uz.pdp.Travel_Agency_bot.model.User;
 import uz.pdp.Travel_Agency_bot.model.UserState;
 
-import java.io.File;
-import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Optional;
 
-import static uz.pdp.Travel_Agency_bot.util.BeanUtil.objectMapper;
+import static uz.pdp.Travel_Agency_bot.util.BeanUtil.*;
 
-public class UserRepositoryImpl implements UserRepository{
+public class UserRepositoryImpl implements UserRepository {
 
     private final static UserRepositoryImpl instance = new UserRepositoryImpl();
+
     private UserRepositoryImpl() {
 
     }
@@ -23,46 +21,82 @@ public class UserRepositoryImpl implements UserRepository{
         return instance;
     }
 
-    String path =
-            "C:\\Java_OOP_Projects\\Travel_Agency_bot\\src\\main\\resources\\Users.json";
-
     @Override
     public ArrayList<User> readFromFile() {
+        ArrayList<User> users = new ArrayList<>();
+        String query = "select * from users";
         try {
-            return objectMapper.readValue(new File(path), new TypeReference<ArrayList<User>>() {});
-        } catch (IOException e) {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = (User) resultSet;
+                users.add(user);
+            }
+            return users;
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
 
     @Override
-    public void writeToFile(ArrayList<User> users) {
+    public void writeToFile(User user) {
+        String query = "insert into users(chatId, first_name, last_name, phone_number, state)" +
+                " values(?,?,?,?,?) ;";
         try {
-            objectMapper.writeValue(new File(path), users);
-        } catch (IOException e) {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, user.getChatId());
+            preparedStatement.setString(2, user.getFirstName());
+            preparedStatement.setString(3, user.getLastName());
+            preparedStatement.setString(4, user.getPhoneNumber());
+            preparedStatement.setString(5, user.getState().toString());
+
+            preparedStatement.execute();
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Optional<User> getUserByChatId(Long chatId) {
-        for (User user : readFromFile())
-            if (Objects.equals(user.getChatId(), chatId)) {
+    public Optional<User> getUserByChatId(String chatId) {
+        String query = "select * from users where chatid like '" + chatId + "';";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                String id = resultSet.getString(1);
+                String first_name = resultSet.getString(2);
+                String last_name = resultSet.getString(3);
+                String phone_number = resultSet.getString(4);
+                UserState state = UserState.valueOf(resultSet.getString(5));
+
+                User user = new User(id, first_name, last_name, phone_number, state);
                 return Optional.of(user);
             }
-        return Optional.empty();
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void updateState(Long chatId, UserState userState) {
-        ArrayList<User> users = readFromFile();
-        for (User user : users) {
-            if (Objects.equals(user.getChatId(), chatId)) {
-                user.setState(userState);
-                break;
-            }
+    public void updateState(String chatId, UserState userState) {
+        String query = "UPDATE users SET state = '" + userState + "'" +
+                " WHERE chatId = '" + chatId + "'";
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.execute();
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        writeToFile(users);
     }
 }
