@@ -7,23 +7,33 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import uz.pdp.Travel_Agency_bot.model.Ticket;
 import uz.pdp.Travel_Agency_bot.model.User;
 import uz.pdp.Travel_Agency_bot.model.UserState;
+import uz.pdp.Travel_Agency_bot.service.ticket.TicketService;
+import uz.pdp.Travel_Agency_bot.service.ticket.TicketServiceImpl;
 import uz.pdp.Travel_Agency_bot.util.BaseUtils;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static uz.pdp.Travel_Agency_bot.util.BeanUtil.botService;
-import static uz.pdp.Travel_Agency_bot.util.BeanUtil.userService;
+import static uz.pdp.Travel_Agency_bot.util.BeanUtil.*;
 
 public class Travel_bot extends TelegramLongPollingBot {
-
+    static ExecutorService executorService = Executors.newCachedThreadPool();
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) {
+//        Ticket ticket = new Ticket(UUID.randomUUID(), null,
+//                "TICKET", "Plane", "UZB", "ITALY", "20.05.2023 08:00");
+//        ticketService.add(ticket);
 
+        if (update.hasMessage()) {
             Message message = update.getMessage();
             String text = message.getText();
             String chatId = message.getChatId().toString();
@@ -35,36 +45,15 @@ public class Travel_bot extends TelegramLongPollingBot {
                 userState = currentUser.get().getState();
                 switch (userState) {
                     case REGISTERED, MENU -> {
+                        UserState currentState = userState;
                         switch (text) {
-                            case "EUROPE" -> {
-                                userService.updateState(chatId, UserState.EUROPE);
-                                userState = UserState.EUROPE;
-                            }
-                            case "ASIA" -> {
-                                userService.updateState(chatId, UserState.ASIA);
-                                userState = UserState.ASIA;
-                            }
-                            case "AFRICA" -> {
-                                userService.updateState(chatId, UserState.AFRICA);
-                                userState = UserState.AFRICA;
-                            }
-                            case "AMERICA" -> {
-                                userService.updateState(chatId, UserState.AMERICA);
-                                userState = UserState.AMERICA;
-                            }
+                            case "EUROPE" -> currentState = UserState.EUROPE;
+                            case "ASIA" -> currentState = UserState.ASIA;
+                            case "AFRICA" -> currentState = UserState.AFRICA;
+                            case "AMERICA" -> currentState = UserState.AMERICA;
                         }
-                    }
-                    case COUNTRY -> {
-                        switch (text) {
-                            case "Bus" -> {
-                                Map<String, String> countries = BaseUtils.countries;
-                                String country = countries.get(chatId);
-                                System.out.println("country = " + country);
-                            }
-                            case "Train" -> {
-
-                            }
-                        }
+                        userService.updateState(chatId, currentState);
+                        userState = currentState;
                     }
                 }
 
@@ -80,28 +69,40 @@ public class Travel_bot extends TelegramLongPollingBot {
                         .build();
                 userService.add(user);
                 userState = UserState.REGISTERED;
-
                 execute(new SendMessage(chatId, "Successfully registered!"));
             }
 
             switch (userState) {
-                case START -> execute(botService.register(chatId));
-                case REGISTERED, MENU -> execute(botService.menu(chatId));
-                case EUROPE -> {
-                    execute(botService.countryMenu(chatId, 1L, userState));
-                    userService.updateState(chatId, UserState.MENU);
+                case START -> {
+                    executorService.execute(() -> {
+                        try {
+                            execute(botService.register(chatId));
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
                 }
-                case ASIA -> {
-                    execute(botService.countryMenu(chatId, 2L, userState));
-                    userService.updateState(chatId, UserState.MENU);
+                case REGISTERED, MENU -> {
+                    executorService.execute(() -> {
+                        try {
+                            execute(botService.menu(chatId));
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 }
-                case AFRICA -> {
-                    execute(botService.countryMenu(chatId, 3L, userState));
-                    userService.updateState(chatId, UserState.MENU);
-                }
-                case AMERICA -> {
-                    execute(botService.countryMenu(chatId, 4L, userState));
-                    userService.updateState(chatId, UserState.MENU);
+                case EUROPE, ASIA, AFRICA, AMERICA -> {
+                    UserState finalUserState = userState;
+                    long continent_id = botService.getContinentId(userState.toString());
+                    executorService.execute(() -> {
+                        try {
+                            execute(botService.countryMenu(chatId, continent_id, finalUserState));
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                        userService.updateState(chatId, UserState.MENU);
+                    });
                 }
             }
 
@@ -116,28 +117,72 @@ public class Travel_bot extends TelegramLongPollingBot {
                 UserState userState = currentUser.get().getState();
                 switch (userState) {
                     case MENU -> {
-                        execute(botService.replyKeyboardRemove(chatId));
-                        execute(botService.countryServiceButtons(chatId, data));
-                        userService.updateState(chatId, UserState.COUNTRY);
-                        userState = UserState.COUNTRY;
+                        executorService.execute(() -> {
+                            try {
+                                execute(botService.countryServiceButtons(chatId, data));
+                                execute(botService.replyKeyboardRemove(chatId));
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                            userService.updateState(chatId, UserState.COUNTRY);
+                        });
                     }
                     case COUNTRY -> {
                         switch (data) {
-                            case "Buy ticket" -> execute(botService.transportMenu(chatId));
+                            case "Buy ticket" -> {
+                                executorService.execute(() -> {
+                                    try {
+                                        execute(botService.transportMenu(chatId));
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    userService.updateState(chatId, UserState.TRANSPORT);
+                                });
+                                userState = UserState.TRANSPORT;
+                            }
                             case "More info" -> {
-                                Map<String, String> countries = BaseUtils.countries;
-                                execute(new SendMessage(chatId, "You can click to this link to get more info"));
-                                execute(botService.countryInfo(chatId, countries.get(chatId)));
-                                userService.updateState(chatId, UserState.MENU);
-                                userState = UserState.MENU;
+                                executorService.execute(() -> {
+                                    Map<String, String> countries = BaseUtils.countries;
+                                    try {
+                                        execute(new SendMessage(chatId, "You can click to this link to get more info"));
+                                        execute(botService.countryInfo(chatId, countries.get(chatId)));
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+
                             }
                             case "MENU" -> {
-                                userService.updateState(chatId, UserState.MENU);
+                                executorService.execute(() -> {
+                                    userService.updateState(chatId, UserState.MENU);
+                                });
                                 userState = UserState.MENU;
                             }
                         }
                         if (userState.equals(UserState.MENU)) {
-                            execute(botService.menu(chatId));
+                            executorService.execute(() -> {
+                                try {
+                                    execute(botService.menu(chatId));
+                                } catch (TelegramApiException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+
+                        }
+                    }
+                    case TRANSPORT -> {
+                        switch (data) {
+                            case "Bus", "Train", "Plane" -> {
+                                Map<String, String> countries = BaseUtils.countries;
+                                executorService.execute(() -> {
+                                    try {
+                                        execute(ticketService.getTicketByTransport(chatId, countries.get(chatId), data));
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                                userService.updateState(chatId, UserState.MENU);
+                            }
                         }
                     }
                 }

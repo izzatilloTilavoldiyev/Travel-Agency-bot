@@ -79,4 +79,9 @@ public class BotServiceImpl implements BotService {
         sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
         return sendMessage;
     }
+
+    @Override
+    public Long getContinentId(String continent) {
+        return countryService.getContinentId(continent);
+    }
 }

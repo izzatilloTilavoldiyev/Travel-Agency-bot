@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static uz.pdp.Travel_Agency_bot.util.BeanUtil.*;
+import static uz.pdp.Travel_Agency_bot.util.DatabaseUtils.*;
 
 public class UserRepositoryImpl implements UserRepository {
 

@@ -3,7 +3,7 @@ package uz.pdp.Travel_Agency_bot.service.bot;
 import java.sql.*;
 import java.util.ArrayList;
 
-import static uz.pdp.Travel_Agency_bot.util.BeanUtil.*;
+import static uz.pdp.Travel_Agency_bot.util.DatabaseUtils.*;
 
 public class CountryService {
     public ArrayList<String> continentsDB() {
@@ -67,6 +67,22 @@ public class CountryService {
                 res = resultSet.getString(3);
             }
             return res;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Long getContinentId(String continent) {
+        long continent_id = 0L;
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            String query = "select id from continent where name like '"+continent+"'";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                continent_id = resultSet.getLong(1);
+            }
+            return continent_id;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

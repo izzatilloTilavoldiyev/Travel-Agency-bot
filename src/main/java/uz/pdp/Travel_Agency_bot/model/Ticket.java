@@ -13,9 +13,11 @@ import java.util.UUID;
 @Builder
 public class Ticket {
     private UUID id;
+    private String user_id;
     private String name;
     private String transport;
     private String from;
     private String to;
     private String date;
+    private Double price;
 }

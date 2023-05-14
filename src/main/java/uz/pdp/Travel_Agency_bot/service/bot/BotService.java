@@ -18,4 +18,6 @@ public interface BotService {
     SendMessage countryInfo(String chatId, String country);
 
     SendMessage replyKeyboardRemove(String chatId);
+
+    Long getContinentId(String continent);
 }
