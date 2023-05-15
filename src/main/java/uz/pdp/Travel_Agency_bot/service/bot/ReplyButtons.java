@@ -15,7 +15,7 @@ public class ReplyButtons {
         replyKeyboardMarkup.setResizeKeyboard(true);
 
         KeyboardRow row = new KeyboardRow();
-        KeyboardButton button = new KeyboardButton("Share contact");
+        KeyboardButton button = new KeyboardButton("☎Share contact");
         button.setRequestContact(true);
         row.add(button);
 

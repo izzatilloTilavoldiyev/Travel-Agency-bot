@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Ticket {
     private UUID id;
     private String user_id;
-    private String name;
+    private String passenger_name;
     private String transport;
     private String from;
     private String to;

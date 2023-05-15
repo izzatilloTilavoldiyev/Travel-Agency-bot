@@ -43,7 +43,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void writeToFile(User user) {
-        String query = "insert into users(chatId, first_name, last_name, phone_number, state)" +
+        String query = "insert into users(chat_id, first_name, last_name, phone_number, state)" +
                 " values(?,?,?,?,?) ;";
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
@@ -64,7 +64,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> getUserByChatId(String chatId) {
-        String query = "select * from users where chatid like '" + chatId + "';";
+        String query = "select * from users where chat_id like '" + chatId + "';";
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -88,7 +88,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void updateState(String chatId, UserState userState) {
         String query = "UPDATE users SET state = '" + userState + "'" +
-                " WHERE chatId = '" + chatId + "'";
+                " WHERE chat_id = '" + chatId + "'";
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement preparedStatement = connection.prepareStatement(query);
