@@ -29,20 +29,17 @@ public class TicketRepositoryImpl implements TicketRepository {
 
     @Override
     public void writeToFile(Ticket ticket) {
-        String query = "insert into tickets(id, user_id, passenger_name," +
-                " transport, from_country, to_country, go_date, price) " +
-                "values(?, ?, ?, ?, ?, ?, ?, ?);";
+        String query = "insert into tickets(id, transport, from_country, to_country, go_date, price) " +
+                "values(?, ?, ?, ?, ?, ?);";
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, ticket.getId().toString());
-            preparedStatement.setString(2, ticket.getUser_id());
-            preparedStatement.setString(3, ticket.getPassenger_name());
-            preparedStatement.setString(4, ticket.getTransport());
-            preparedStatement.setString(5, ticket.getFrom());
-            preparedStatement.setString(6, ticket.getTo());
-            preparedStatement.setString(7, ticket.getDate());
-            preparedStatement.setDouble(8, ticket.getPrice());
+            preparedStatement.setString(2, ticket.getTransport());
+            preparedStatement.setString(3, ticket.getFrom());
+            preparedStatement.setString(4, ticket.getTo());
+            preparedStatement.setString(5, ticket.getDate());
+            preparedStatement.setDouble(6, ticket.getPrice());
             preparedStatement.execute();
             preparedStatement.close();
             connection.close();
@@ -62,14 +59,12 @@ public class TicketRepositoryImpl implements TicketRepository {
 
             while (resultSet.next()) {
                 UUID id = UUID.fromString(resultSet.getString(1));
-                String user_id = resultSet.getString(2);
-                String passenger_name = resultSet.getString(3);
-                String trans = resultSet.getString(4);
-                String from = resultSet.getString(5);
-                String to = resultSet.getString(6);
-                String date = resultSet.getString(7);
-                Double price = resultSet.getDouble(8);
-                Ticket ticket = new Ticket(id, user_id, passenger_name, trans, from, to, date, price);
+                String trans = resultSet.getString(2);
+                String from = resultSet.getString(3);
+                String to = resultSet.getString(4);
+                String date = resultSet.getString(5);
+                Double price = resultSet.getDouble(6);
+                Ticket ticket = new Ticket(id, trans, from, to, date, price);
                 ticketsDB.add(ticket);
             }
 

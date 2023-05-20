@@ -11,11 +11,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Ticket {
-    private UUID id;
-    private String transport;
-    private String from;
-    private String to;
-    private String date;
-    private Double price;
+public class Card {
+    private UUID card_id;
+    private String  user_id;
+    private String username;
+    private String brand;
+    private String card_number;
+    private Double balance;
 }

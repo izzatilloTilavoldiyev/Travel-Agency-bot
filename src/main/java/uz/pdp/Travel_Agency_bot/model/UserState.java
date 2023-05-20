@@ -1,6 +1,8 @@
 package uz.pdp.Travel_Agency_bot.model;
 
 public enum UserState {
+    BASE_MENU,
+    MyAccount,
     START,
     REGISTERED,
     EUROPE,
@@ -9,5 +11,13 @@ public enum UserState {
     AMERICA,
     MENU,
     COUNTRY,
-    TRANSPORT
+    TRANSPORT,
+    TEST,
+    MyCards,
+    MyTickets,
+    Balance,
+    History,
+    FullName,
+    FillBalance,
+    EnterAmount
 }
