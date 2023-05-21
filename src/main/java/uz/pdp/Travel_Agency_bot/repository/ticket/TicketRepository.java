@@ -1,6 +1,7 @@
 package uz.pdp.Travel_Agency_bot.repository.ticket;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import uz.pdp.Travel_Agency_bot.model.Card;
 import uz.pdp.Travel_Agency_bot.model.Ticket;
 import uz.pdp.Travel_Agency_bot.repository.BaseRepository;
 
@@ -14,5 +15,5 @@ public interface TicketRepository extends BaseRepository<Ticket> {
     Ticket getById(String id);
 
     List<Ticket> getTicketsByUserId(String userId);
-    void buyTicket(String userId, String ticketId);
+    void buyTicket(String userId, String ticketId, Card card);
 }

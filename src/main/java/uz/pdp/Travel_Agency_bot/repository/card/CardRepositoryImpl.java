@@ -18,6 +18,8 @@ public class CardRepositoryImpl implements CardRepository{
         return instance;
     }
 
+    Card travelCard = userCard("5555555555");
+
     @Override
     public ArrayList<Card> readFromFile() {
         return null;
@@ -83,18 +85,34 @@ public class CardRepositoryImpl implements CardRepository{
         if (userCard != null) {
             double aMount = userCard.getBalance() + amount;
             String query = "update cards set balance = "+aMount+" where card_number = '"+card+"'";
-            try {
-                Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.execute();
-                preparedStatement.close();
-                connection.close();
-                return 200;
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            update(query);
+            return 200;
         }else {
             return 400;
         }
     }
+
+    @Override
+    public void ticketTransaction(Card card, Double amount) {
+        String query = "update cards set balance = "+
+                (card.getBalance()-amount)+" where card_number = '"+card.getCard_number()+"'";
+        update(query);
+        query = "update cards set balance = "+
+                (travelCard.getBalance() + amount)+" where card_number = '"+travelCard.getCard_number()+"'";
+        update(query);
+    }
+
+    private void update(String query) {
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.execute();
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
