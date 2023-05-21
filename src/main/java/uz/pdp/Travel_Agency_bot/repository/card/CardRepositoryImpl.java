@@ -1,11 +1,9 @@
 package uz.pdp.Travel_Agency_bot.repository.card;
 
 import uz.pdp.Travel_Agency_bot.model.Card;
-import uz.pdp.Travel_Agency_bot.model.User;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
 import static uz.pdp.Travel_Agency_bot.util.DatabaseUtils.*;
@@ -49,6 +47,16 @@ public class CardRepositoryImpl implements CardRepository{
     @Override
     public Card userCard(String userId) {
         String query = "select * from cards where user_id = '" + userId + "'";
+        return getById(query);
+    }
+
+    @Override
+    public Card getCardById(String cardId) {
+        String query = "select * from cards where card_id = '" + cardId + "'";
+        return getById(query);
+    }
+
+    private Card getById(String query) {
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
             PreparedStatement preparedStatement = connection.prepareStatement(query);

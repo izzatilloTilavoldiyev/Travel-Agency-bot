@@ -99,18 +99,13 @@ public class InlineButtons {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup cardMenuButtons(String card_number, String brand) {
+    public InlineKeyboardMarkup cardMenuButtons(Card card) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
 
-        InlineKeyboardButton button = new InlineKeyboardButton("⭐  "+card_number+"  ➡"+brand);
-        button.setCallbackData(card_number);
-        row.add(button);
-        rows.add(row);
-        row = new ArrayList<>();
-        button = new InlineKeyboardButton("➕"+Create_card);
-        button.setCallbackData(Create_card);
+        InlineKeyboardButton button = new InlineKeyboardButton("⭐  "+card.getCard_number()+"  ➡"+card.getBrand());
+        button.setCallbackData(String.valueOf(card.getCard_id()));
         row.add(button);
         rows.add(row);
         inlineKeyboardMarkup.setKeyboard(rows);
@@ -143,13 +138,6 @@ public class InlineButtons {
         InlineKeyboardButton button = new InlineKeyboardButton(sticker+value);
         button.setCallbackData(value);
         row.add(button);
-
-//        rows.add(row);
-//        row = new ArrayList<>();
-//
-//        button = new InlineKeyboardButton("⬅"+Back);
-//        button.setCallbackData(Back);
-//        row.add(button);
 
         rows.add(row);
         inlineKeyboardMarkup.setKeyboard(rows);

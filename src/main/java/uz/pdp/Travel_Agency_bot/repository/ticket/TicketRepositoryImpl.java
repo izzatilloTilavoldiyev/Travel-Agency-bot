@@ -6,6 +6,7 @@ import uz.pdp.Travel_Agency_bot.service.bot.InlineButtons;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static uz.pdp.Travel_Agency_bot.util.DatabaseUtils.*;
@@ -49,44 +50,92 @@ public class TicketRepositoryImpl implements TicketRepository {
     }
 
     @Override
-    public SendMessage getTicketByTransport(String chatId, String country, String transport) {
-        ArrayList<Ticket> ticketsDB = new ArrayList<>();
-        String query = "select * from tickets where transport like '"+transport+"' and to_country like '"+country+"'";
+    public Ticket getTicketByTransport(String chatId, String country, String transport) {
         try {
             Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            PreparedStatement preparedStatement = connection.prepareStatement("select * from tickets where transport like ? and to_country like ?");
+            preparedStatement.setString(1, transport);
+            preparedStatement.setString(2, country);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                UUID id = UUID.fromString(resultSet.getString(1));
-                String trans = resultSet.getString(2);
-                String from = resultSet.getString(3);
-                String to = resultSet.getString(4);
-                String date = resultSet.getString(5);
-                Double price = resultSet.getDouble(6);
-                Ticket ticket = new Ticket(id, trans, from, to, date, price);
-                ticketsDB.add(ticket);
+            Ticket ticket = null;
+            if (resultSet.next()) {
+                ticket = setTicketValues(resultSet);
             }
+            return ticket;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(chatId);
-            StringBuilder tickets = new StringBuilder();
-            if (ticketsDB.size() > 0) {
-                for (Ticket ticket : ticketsDB) {
-                    tickets.append("********** TICKET **********").append('\n');
-                    tickets.append("\uD83D\uDE8DTransport -> ").append(ticket.getTransport()).append('\n');
-                    tickets.append("\uD83C\uDDFA\uD83C\uDDFFFrom -> ").append(ticket.getFrom()).append('\n');
-                    tickets.append("\uD83D\uDEA9To -> ").append(ticket.getTo()).append('\n');
-                    tickets.append("\uD83D\uDCC5Date -> ").append(ticket.getDate()).append('\n');
-                    tickets.append("\uD83D\uDCB4Price -> ").append(ticket.getPrice()).append('$').append('\n');
-                    tickets.append('\n');
-                }
-                sendMessage.setText(tickets.toString());
-                sendMessage.setReplyMarkup(inlineButtons.buyTicketButtons());
-            }else {
-                sendMessage.setText("There is no any tickets yet!");
+    private Ticket setTicketValues(ResultSet resultSet){
+        try {
+            UUID id = UUID.fromString(resultSet.getString(1));
+            String trans = resultSet.getString(2);
+            String from = resultSet.getString(3);
+            String to = resultSet.getString(4);
+            String date = resultSet.getString(5);
+            Double price = resultSet.getDouble(6);
+            return new Ticket(id, trans, from, to, date, price);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Ticket getById(String id) {
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(String.format("select * from tickets where id = '%s'", id));
+            Ticket ticket = null;
+            while (resultSet.next()){
+                ticket = setTicketValues(resultSet);
             }
-            return sendMessage;
+            statement.close();
+            connection.close();
+            return ticket;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Ticket> getTicketsByUserId(String userId) {
+        List<Ticket> tickets = new ArrayList<>();
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    """
+                         select ticket_id from user_ticket where user_id = ?
+                         """
+            );
+            preparedStatement.setString(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                Ticket byId = getById(resultSet.getString(1));
+                tickets.add(byId);
+            }
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return tickets;
+    }
+
+    @Override
+    public void buyTicket(String userId, String ticketId) {
+        try {
+            Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into user_ticket(user_id, ticket_id) values(?, ?)"
+            );
+            preparedStatement.setString(1, userId);
+            preparedStatement.setString(2, ticketId);
+            preparedStatement.execute();
+            preparedStatement.close();
+            connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

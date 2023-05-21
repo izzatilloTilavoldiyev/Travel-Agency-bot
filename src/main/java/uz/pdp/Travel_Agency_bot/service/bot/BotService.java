@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import uz.pdp.Travel_Agency_bot.model.Card;
 import uz.pdp.Travel_Agency_bot.model.UserState;
 
@@ -16,6 +17,7 @@ public interface BotService {
     SendPhoto countryMenu(String chatId, Long continent_id, UserState state);
 
     SendPhoto countryServiceButtons(String chatId, String country);
+    InlineKeyboardMarkup buyTicketButtons();
 
     SendPhoto transportMenu(String chatId);
 

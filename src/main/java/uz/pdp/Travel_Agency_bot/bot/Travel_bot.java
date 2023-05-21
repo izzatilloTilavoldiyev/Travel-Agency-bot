@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.Travel_Agency_bot.model.Card;
+import uz.pdp.Travel_Agency_bot.model.Ticket;
 import uz.pdp.Travel_Agency_bot.model.User;
 import uz.pdp.Travel_Agency_bot.model.UserState;
 import uz.pdp.Travel_Agency_bot.util.BaseUtils;
@@ -25,6 +26,11 @@ public class Travel_bot extends TelegramLongPollingBot {
     static Random random = new Random();
     static String cardNumber = "";
     static double amount = 0.0;
+
+    @Override
+    public String getBotUsername() {
+        return "G23_Travel_bot";
+    }
 
     @SneakyThrows
     @Override
@@ -87,8 +93,9 @@ public class Travel_bot extends TelegramLongPollingBot {
                                 }
                                 case My_tickets -> {
                                     try {
+                                        List<Ticket> ticketDB = ticketService.getTicketsByUserId(chatId);
                                         execute(botService.display_1_button(chatId,
-                                                "Your tickets", Delete_tickets));
+                                                ticketDB.toString(), Delete_tickets));
                                     } catch (TelegramApiException e) {
                                         throw new RuntimeException(e);
                                     }
@@ -141,9 +148,11 @@ public class Travel_bot extends TelegramLongPollingBot {
                         case EnterAmount -> {
                             try {
                                 amount = Double.parseDouble(text);
-                            }catch (Exception e) {
+                            } catch (Exception e) {
                                 try {
-                                    execute(new SendMessage(chatId, "Wrong amount"));
+                                    execute(new SendMessage(chatId, "Something went wrong... try again"));
+                                    userService.updateState(chatId, UserState.MyAccount);
+                                    return;
                                 } catch (TelegramApiException ex) {
                                     throw new RuntimeException(ex);
                                 }
@@ -152,12 +161,14 @@ public class Travel_bot extends TelegramLongPollingBot {
                             if (res == 200) {
                                 try {
                                     execute(new SendMessage(chatId, "Successfully felt"));
+                                    cardNumber = null;
+                                    amount = 0.0;
                                 } catch (TelegramApiException e) {
                                     throw new RuntimeException(e);
                                 }
-                            }else {
+                            } else {
                                 try {
-                                    execute(new SendMessage(chatId, "Something went wrong!"));
+                                    execute(new SendMessage(chatId, "Something went wrong... try again"));
                                 } catch (TelegramApiException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -283,16 +294,36 @@ public class Travel_bot extends TelegramLongPollingBot {
                                 case Bus, Train, Plane -> {
                                     Map<String, String> countries = BaseUtils.countries;
                                     try {
-                                        execute(ticketService.getTicketByTransport(chatId, countries.get(chatId), data));
+                                        Ticket ticketDB = ticketService.getTicketByTransport(chatId, countries.get(chatId), data);
+                                        SendMessage sendMessage = new SendMessage();
+                                        sendMessage.setChatId(chatId);
+                                        StringBuilder tickets = new StringBuilder();
+                                        if (ticketDB != null) {
+                                            tickets.append("********** TICKET **********").append('\n');
+                                            tickets.append("\uD83D\uDE8DTransport -> ").append(ticketDB.getTransport()).append('\n');
+                                            tickets.append("\uD83C\uDDFA\uD83C\uDDFFFrom -> ").append(ticketDB.getFrom()).append('\n');
+                                            tickets.append("\uD83D\uDEA9To -> ").append(ticketDB.getTo()).append('\n');
+                                            tickets.append("\uD83D\uDCC5Date -> ").append(ticketDB.getDate()).append('\n');
+                                            tickets.append("\uD83D\uDCB4Price -> ").append(ticketDB.getPrice()).append('$').append('\n');
+                                            tickets.append('\n');
+                                            sendMessage.setText(tickets.toString());
+                                            sendMessage.setReplyMarkup(botService.buyTicketButtons());
+                                            BaseUtils.ticketMap.remove(chatId);
+                                            BaseUtils.ticketMap.put(chatId, ticketDB);
+                                        } else {
+                                            sendMessage.setText("There is no any tickets yet!");
+                                        }
+                                        execute(sendMessage);
                                     } catch (TelegramApiException e) {
                                         throw new RuntimeException(e);
                                     }
                                 }
                                 case "1" -> {
                                     try {
-                                        execute(new SendMessage(chatId, "Bought"));
-                                        userService.updateState(chatId, UserState.MENU);
-                                        userState = UserState.MENU;
+                                        execute(botService.cardMenuButtons(cardService.userCard(chatId), chatId));
+                                        execute(new SendMessage(chatId, "Click your card"));
+                                        userService.updateState(chatId, UserState.Card);
+                                        userState = UserState.Card;
                                     } catch (TelegramApiException e) {
                                         throw new RuntimeException(e);
                                     }
@@ -326,6 +357,22 @@ public class Travel_bot extends TelegramLongPollingBot {
 
                             }
                         }
+                        case Card -> {
+                            Ticket ticket = BaseUtils.ticketMap.get(chatId);
+                            Card card = cardService.getCardById(data);
+                            int result = ticketService.buyTicket(chatId, ticket, card);
+                            try {
+                                if (result == 200){
+                                    execute(new SendMessage(chatId, "Successfully ordered"));
+                                }else {
+                                    execute(new SendMessage(chatId,
+                                            "You don't have enough money... please fill your balance"));
+                                }
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                            userService.updateState(chatId, UserState.MENU);
+                        }
                     }
                     if (Objects.equals(userState, UserState.MENU)) {
                         try {
@@ -337,11 +384,6 @@ public class Travel_bot extends TelegramLongPollingBot {
                 }
             }
         });
-    }
-
-    @Override
-    public String getBotUsername() {
-        return "G23_Travel_bot";
     }
 
     @Override

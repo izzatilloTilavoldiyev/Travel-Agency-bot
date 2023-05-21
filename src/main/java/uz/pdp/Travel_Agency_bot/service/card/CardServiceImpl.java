@@ -17,6 +17,11 @@ public class CardServiceImpl implements CardService{
     }
 
     @Override
+    public Card getCardById(String cardId) {
+        return cardRepository.getCardById(cardId);
+    }
+
+    @Override
     public Integer fillBalance(String chatId, String card, double amount) {
         return cardRepository.fillBalance(chatId, card, amount);
     }

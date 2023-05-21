@@ -5,10 +5,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import uz.pdp.Travel_Agency_bot.model.Card;
 import uz.pdp.Travel_Agency_bot.model.UserState;
-import uz.pdp.Travel_Agency_bot.service.card.CardService;
-import uz.pdp.Travel_Agency_bot.service.card.CardServiceImpl;
 import uz.pdp.Travel_Agency_bot.util.BaseUtils;
 
 import java.io.File;
@@ -66,6 +65,11 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
+    public InlineKeyboardMarkup buyTicketButtons() {
+        return inlineButtons.buyTicketButtons();
+    }
+
+    @Override
     public SendPhoto transportMenu(String chatId) {
         return SendPhoto.builder()
                 .chatId(chatId)
@@ -110,7 +114,7 @@ public class BotServiceImpl implements BotService {
             sendMessage.setText("You dont have any card yet... please add card!");
             sendMessage.setReplyMarkup(inlineButtons.createCardButton());
         }else {
-            sendMessage.setReplyMarkup(inlineButtons.cardMenuButtons(card.getCard_number(), card.getBrand()));
+            sendMessage.setReplyMarkup(inlineButtons.cardMenuButtons(card));
         }
         return sendMessage;
     }

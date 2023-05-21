@@ -19,5 +19,6 @@ public enum UserState {
     History,
     FullName,
     FillBalance,
-    EnterAmount
+    EnterAmount,
+    Card
 }
